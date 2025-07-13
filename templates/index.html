@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_settings.site_name if site_settings else 'متجر الأزياء اليمني' }}{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="hero-title">{{ site_settings.site_name if site_settings else 'متجر الأزياء اليمني' }}</h1>
+                <p class="hero-description">{{ site_settings.site_description if site_settings else 'متجر الأزياء اليمني الأول في اليمن' }}</p>
+                <a href="#products" class="btn btn-glass btn-lg">
+                    <i class="fas fa-shopping-bag"></i> تسوق الآن
+                </a>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image">
+                    <i class="fas fa-tshirt hero-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categories -->
+{% if categories %}
+<section class="categories-section">
+    <div class="container">
+        <h2 class="section-title">التصنيفات</h2>
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <a href="{{ url_for('category_products', category_id=category.id) }}" class="category-card">
+                    <div class="glass-card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-tags category-icon"></i>
+                            <h5 class="card-title">{{ category.name }}</h5>
+                            <p class="card-text">{{ category.description or 'تصفح المنتجات' }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Products -->
+<section id="products" class="products-section">
+    <div class="container">
+        <h2 class="section-title">المنتجات</h2>
+        
+        {% if products %}
+        <div class="row">
+            {% for product in products %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="glass-card product-card">
+                    <div class="product-image">
+                        {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="card-img-top">
+                        {% else %}
+                        <div class="placeholder-image">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description[:100] }}...</p>
+                        <div class="product-price">{{ product.price }} ريال</div>
+                        
+                        <!-- Rating -->
+                        <div class="rating mb-2">
+                            {% set avg_rating = product.get_average_rating() %}
+                            {% for i in range(1, 6) %}
+                                {% if i <= avg_rating %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-warning"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ms-2">({{ product.ratings|length }})</span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-glass">
+                                <i class="fas fa-eye"></i> عرض التفاصيل
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
+            <h3>لا توجد منتجات حالياً</h3>
+            <p class="text-muted">سيتم إضافة منتجات جديدة قريباً</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

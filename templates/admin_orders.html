@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة الطلبات - {{ site_settings.site_name if site_settings else 'متجر الأزياء اليمني' }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="page-title">إدارة الطلبات</h1>
+        </div>
+    </div>
+    
+    <!-- Orders Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card">
+                <div class="card-body">
+                    {% if orders %}
+                    <div class="table-responsive">
+                        <table class="table table-glass">
+                            <thead>
+                                <tr>
+                                    <th>رقم الطلب</th>
+                                    <th>العميل</th>
+                                    <th>الهاتف</th>
+                                    <th>المنتج</th>
+                                    <th>المنطقة</th>
+                                    <th>المبلغ</th>
+                                    <th>الحالة</th>
+                                    <th>التاريخ</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.customer_name }}</td>
+                                    <td>{{ order.phone }}</td>
+                                    <td>
+                                        {{ order.product.name }}
+                                        {% if order.size %}<br><small>المقاس: {{ order.size }}</small>{% endif %}
+                                        {% if order.color %}<br><small>اللون: {{ order.color }}</small>{% endif %}
+                                    </td>
+                                    <td>{{ order.region.name }}</td>
+                                    <td>{{ order.total_amount }} ريال</td>
+                                    <td>
+                                        <span class="badge bg-{% if order.status == 'جديد' %}primary{% elif order.status == 'قيد التجهيز' %}warning{% elif order.status == 'تم الإرسال' %}info{% elif order.status == 'تم التسليم' %}success{% else %}danger{% endif %}">
+                                            {{ order.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editOrder({{ order.id }}, '{{ order.status }}', '{{ order.notes or '' }}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewOrder({{ order.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <h3>لا توجد طلبات</h3>
+                        <p class="text-muted">لم يتم تسجيل أي طلبات حتى الآن</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Order Modal -->
+<div class="modal fade" id="editOrderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل الطلب</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editOrderForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">حالة الطلب</label>
+                        <select name="status" class="form-select glass-input" required>
+                            <option value="جديد">جديد</option>
+                            <option value="قيد التجهيز">قيد التجهيز</option>
+                            <option value="تم الإرسال">تم الإرسال</option>
+                            <option value="تم التسليم">تم التسليم</option>
+                            <option value="ملغي">ملغي</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ملاحظات</label>
+                        <textarea name="notes" class="form-control glass-input" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-glass">حفظ التعديلات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Order Modal -->
+<div class="modal fade" id="viewOrderModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">تفاصيل الطلب</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderDetails">
+                <!-- Order details will be populated by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function editOrder(orderId, currentStatus, currentNotes) {
+    const form = document.getElementById('editOrderForm');
+    form.action = `/admin/orders/update_status/${orderId}`;
+    
+    const statusSelect = form.querySelector('select[name="status"]');
+    const notesTextarea = form.querySelector('textarea[name="notes"]');
+    
+    statusSelect.value = currentStatus;
+    notesTextarea.value = currentNotes;
+    
+    new bootstrap.Modal(document.getElementById('editOrderModal')).show();
+}
+
+function viewOrder(orderId) {
+    // This would typically fetch order details via AJAX
+    // For now, we'll show a placeholder
+    document.getElementById('orderDetails').innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p class="mt-2">جاري تحميل تفاصيل الطلب...</p>
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('viewOrderModal')).show();
+}
+</script>
+{% endblock %}

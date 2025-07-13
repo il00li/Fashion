@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}إعدادات الموقع - {{ site_settings.site_name if site_settings else 'متجر الأزياء اليمني' }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="page-title">إعدادات الموقع</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Site Settings -->
+        <div class="col-lg-8">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h5>إعدادات عامة</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('admin_update_settings') }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">اسم الموقع</label>
+                            <input type="text" name="site_name" class="form-control glass-input" 
+                                   value="{{ settings.site_name if settings else '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">وصف الموقع</label>
+                            <textarea name="site_description" class="form-control glass-input" rows="3">{{ settings.site_description if settings else '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">رقم واتساب (بدون علامة +)</label>
+                            <input type="text" name="whatsapp_number" class="form-control glass-input" 
+                                   value="{{ settings.whatsapp_number if settings else '' }}" 
+                                   placeholder="967XXXXXXXX" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">رابط الشعار</label>
+                            <input type="url" name="logo_url" class="form-control glass-input" 
+                                   value="{{ settings.logo_url if settings else '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">رمز المدير الجديد (اتركه فارغاً لعدم التغيير)</label>
+                            <input type="password" name="new_admin_code" class="form-control glass-input" 
+                                   placeholder="أدخل رمز المدير الجديد">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-glass">
+                            <i class="fas fa-save"></i> حفظ الإعدادات
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Categories Management -->
+            <div class="glass-card mt-4">
+                <div class="card-header">
+                    <h5>إدارة التصنيفات</h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-glass mb-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                        <i class="fas fa-plus"></i> إضافة تصنيف
+                    </button>
+                    
+                    {% if categories %}
+                    <div class="table-responsive">
+                        <table class="table table-glass">
+                            <thead>
+                                <tr>
+                                    <th>الاسم</th>
+                                    <th>الوصف</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categories %}
+                                <tr>
+                                    <td>{{ category.name }}</td>
+                                    <td>{{ category.description or '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if category.is_active %}success{% else %}danger{% endif %}">
+                                            {% if category.is_active %}نشط{% else %}غير نشط{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">لا توجد تصنيفات</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Log -->
+        <div class="col-lg-4">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h5>سجل النشاط</h5>
+                </div>
+                <div class="card-body">
+                    {% if logs %}
+                    <div class="activity-log">
+                        {% for log in logs %}
+                        <div class="activity-item">
+                            <div class="activity-content">
+                                <strong>{{ log.action }}</strong>
+                                {% if log.details %}
+                                <div class="activity-details">{{ log.details }}</div>
+                                {% endif %}
+                                <small class="text-muted">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">لا توجد أنشطة</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة تصنيف جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin_add_category') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم التصنيف</label>
+                        <input type="text" name="name" class="form-control glass-input" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea name="description" class="form-control glass-input" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-glass">إضافة التصنيف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

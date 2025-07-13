@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة المناطق - {{ site_settings.site_name if site_settings else 'متجر الأزياء اليمني' }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">إدارة المناطق</h1>
+                <button class="btn btn-glass" data-bs-toggle="modal" data-bs-target="#addRegionModal">
+                    <i class="fas fa-plus"></i> إضافة منطقة
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Regions Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card">
+                <div class="card-body">
+                    {% if regions %}
+                    <div class="table-responsive">
+                        <table class="table table-glass">
+                            <thead>
+                                <tr>
+                                    <th>اسم المنطقة</th>
+                                    <th>رسوم التوصيل</th>
+                                    <th>المدة المتوقعة</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for region in regions %}
+                                <tr>
+                                    <td>{{ region.name }}</td>
+                                    <td>{{ region.delivery_fee }} ريال</td>
+                                    <td>{{ region.estimated_time }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if region.is_active %}success{% else %}danger{% endif %}">
+                                            {% if region.is_active %}نشط{% else %}غير نشط{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editRegion({{ region.id }}, '{{ region.name }}', {{ region.delivery_fee }}, '{{ region.estimated_time }}', {{ region.is_active|lower }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                        <h3>لا توجد مناطق</h3>
+                        <p class="text-muted">ابدأ بإضافة منطقة التوصيل الأولى</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Region Modal -->
+<div class="modal fade" id="addRegionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة منطقة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin_add_region') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم المنطقة</label>
+                        <input type="text" name="name" class="form-control glass-input" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">رسوم التوصيل (ريال)</label>
+                        <input type="number" name="delivery_fee" class="form-control glass-input" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">المدة المتوقعة</label>
+                        <input type="text" name="estimated_time" class="form-control glass-input" placeholder="مثال: يوم واحد، يومان، 3 أيام" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-glass">إضافة المنطقة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Region Modal -->
+<div class="modal fade" id="editRegionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل المنطقة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editRegionForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم المنطقة</label>
+                        <input type="text" name="name" class="form-control glass-input" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">رسوم التوصيل (ريال)</label>
+                        <input type="number" name="delivery_fee" class="form-control glass-input" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">المدة المتوقعة</label>
+                        <input type="text" name="estimated_time" class="form-control glass-input" required>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="editIsActive">
+                            <label class="form-check-label" for="editIsActive">
+                                منطقة نشطة
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-glass">حفظ التعديلات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function editRegion(regionId, name, deliveryFee, estimatedTime, isActive) {
+    const form = document.getElementById('editRegionForm');
+    form.action = `/admin/regions/edit/${regionId}`;
+    
+    form.querySelector('input[name="name"]').value = name;
+    form.querySelector('input[name="delivery_fee"]').value = deliveryFee;
+    form.querySelector('input[name="estimated_time"]').value = estimatedTime;
+    form.querySelector('input[name="is_active"]').checked = isActive;
+    
+    new bootstrap.Modal(document.getElementById('editRegionModal')).show();
+}
+</script>
+{% endblock %}

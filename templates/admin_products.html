@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة المنتجات - {{ site_settings.site_name if site_settings else 'متجر الأزياء اليمني' }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">إدارة المنتجات</h1>
+                <button class="btn btn-glass" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="fas fa-plus"></i> إضافة منتج
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card">
+                <div class="card-body">
+                    {% if products %}
+                    <div class="table-responsive">
+                        <table class="table table-glass">
+                            <thead>
+                                <tr>
+                                    <th>الصورة</th>
+                                    <th>الاسم</th>
+                                    <th>التصنيف</th>
+                                    <th>السعر</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                <tr>
+                                    <td>
+                                        {% if product.image_url %}
+                                        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="rounded" width="50" height="50">
+                                        {% else %}
+                                        <div class="placeholder-image-small">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.category.name }}</td>
+                                    <td>{{ product.price }} ريال</td>
+                                    <td>
+                                        <span class="badge bg-{% if product.is_active %}success{% else %}danger{% endif %}">
+                                            {% if product.is_active %}نشط{% else %}غير نشط{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editProduct({{ product.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <a href="{{ url_for('admin_delete_product', product_id=product.id) }}" 
+                                           class="btn btn-sm btn-outline-danger" 
+                                           onclick="return confirm('هل أنت متأكد من حذف هذا المنتج؟')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                        <h3>لا توجد منتجات</h3>
+                        <p class="text-muted">ابدأ بإضافة منتجك الأول</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة منتج جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin_add_product') }}" method="POST">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">اسم المنتج</label>
+                                <input type="text" name="name" class="form-control glass-input" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">التصنيف</label>
+                                <select name="category_id" class="form-select glass-input" required>
+                                    <option value="">اختر التصنيف</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">السعر (ريال)</label>
+                                <input type="number" name="price" class="form-control glass-input" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">رابط الصورة</label>
+                                <input type="url" name="image_url" class="form-control glass-input">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea name="description" class="form-control glass-input" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">المقاسات (اختياري)</label>
+                                <div class="size-checkboxes">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sizes" value="صغير" id="size1">
+                                        <label class="form-check-label" for="size1">صغير</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sizes" value="متوسط" id="size2">
+                                        <label class="form-check-label" for="size2">متوسط</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sizes" value="كبير" id="size3">
+                                        <label class="form-check-label" for="size3">كبير</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sizes" value="كبير جداً" id="size4">
+                                        <label class="form-check-label" for="size4">كبير جداً</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الألوان (اختياري)</label>
+                                <div class="color-checkboxes">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أسود" id="color1">
+                                        <label class="form-check-label" for="color1">أسود</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أبيض" id="color2">
+                                        <label class="form-check-label" for="color2">أبيض</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أحمر" id="color3">
+                                        <label class="form-check-label" for="color3">أحمر</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أزرق" id="color4">
+                                        <label class="form-check-label" for="color4">أزرق</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أخضر" id="color5">
+                                        <label class="form-check-label" for="color5">أخضر</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-glass">إضافة المنتج</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل المنتج</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editProductForm" method="POST">
+                <div class="modal-body">
+                    <!-- Form fields will be populated by JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-glass">حفظ التعديلات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function editProduct(productId) {
+    // This would typically fetch product data via AJAX
+    // For now, we'll use a simplified approach
+    window.location.href = `{{ url_for('admin_products') }}#edit-${productId}`;
+}
+</script>
+{% endblock %}

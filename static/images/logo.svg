@@ -1,0 +1,75 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5BC0EB;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#5BC0EB;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with glassmorphism effect -->
+  <circle cx="100" cy="100" r="90" fill="rgba(91, 192, 235, 0.1)" 
+          stroke="rgba(91, 192, 235, 0.3)" stroke-width="2" filter="url(#glow)"/>
+  
+  <!-- Main logo design - Traditional Yemeni dress silhouette -->
+  <g transform="translate(100, 100)">
+    <!-- Dress body -->
+    <path d="M-25 -40 Q-35 -30 -35 -10 L-35 20 Q-35 35 -25 40 L25 40 Q35 35 35 20 L35 -10 Q35 -30 25 -40 Z" 
+          fill="url(#logoGradient)" opacity="0.8"/>
+    
+    <!-- Dress sleeves -->
+    <ellipse cx="-45" cy="-20" rx="15" ry="25" fill="url(#logoGradient)" opacity="0.6"/>
+    <ellipse cx="45" cy="-20" rx="15" ry="25" fill="url(#logoGradient)" opacity="0.6"/>
+    
+    <!-- Dress neckline -->
+    <path d="M-15 -40 Q0 -50 15 -40 Q15 -35 0 -35 Q-15 -35 -15 -40 Z" 
+          fill="url(#logoGradient)" opacity="0.9"/>
+    
+    <!-- Traditional embroidery pattern -->
+    <g fill="rgba(255, 255, 255, 0.7)">
+      <circle cx="-15" cy="-10" r="2"/>
+      <circle cx="0" cy="-10" r="2"/>
+      <circle cx="15" cy="-10" r="2"/>
+      <circle cx="-15" cy="5" r="2"/>
+      <circle cx="0" cy="5" r="2"/>
+      <circle cx="15" cy="5" r="2"/>
+      <circle cx="-15" cy="20" r="2"/>
+      <circle cx="0" cy="20" r="2"/>
+      <circle cx="15" cy="20" r="2"/>
+    </g>
+    
+    <!-- Fashion elements -->
+    <g stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" fill="none">
+      <path d="M-20 -15 Q0 -20 20 -15"/>
+      <path d="M-20 0 Q0 -5 20 0"/>
+      <path d="M-20 15 Q0 10 20 15"/>
+    </g>
+    
+    <!-- Hanger hook at top -->
+    <g transform="translate(0, -55)">
+      <rect x="-3" y="0" width="6" height="10" fill="url(#logoGradient)" rx="3"/>
+      <circle cx="0" cy="0" r="5" fill="none" stroke="url(#logoGradient)" stroke-width="2"/>
+    </g>
+  </g>
+  
+  <!-- Decorative elements around the logo -->
+  <g fill="rgba(91, 192, 235, 0.4)">
+    <circle cx="50" cy="50" r="3"/>
+    <circle cx="150" cy="50" r="3"/>
+    <circle cx="50" cy="150" r="3"/>
+    <circle cx="150" cy="150" r="3"/>
+  </g>
+  
+  <!-- Brand name text (if needed) -->
+  <text x="100" y="180" font-family="Cairo, sans-serif" font-size="12" 
+        fill="rgba(255, 255, 255, 0.9)" text-anchor="middle" font-weight="600">
+    متجر الأزياء اليمني
+  </text>
+</svg>
