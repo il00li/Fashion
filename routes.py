@@ -299,6 +299,25 @@ def admin_delete_product(product_id):
     
     return redirect(url_for('admin_products'))
 
+@app.route('/admin/products/get/<int:product_id>')
+def admin_get_product(product_id):
+    if not is_admin_authenticated():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    product = Product.query.get_or_404(product_id)
+    
+    return jsonify({
+        'id': product.id,
+        'name': product.name,
+        'description': product.description,
+        'price': product.price,
+        'image_url': product.image_url,
+        'category_id': product.category_id,
+        'sizes': product.get_sizes_list(),
+        'colors': product.get_colors_list(),
+        'is_active': product.is_active
+    })
+
 @app.route('/admin/orders')
 def admin_orders():
     if not is_admin_authenticated():
@@ -411,6 +430,11 @@ def admin_update_settings():
         settings.site_description = request.form.get('site_description')
         settings.whatsapp_number = request.form.get('whatsapp_number')
         settings.logo_url = request.form.get('logo_url')
+        settings.primary_color = request.form.get('primary_color')
+        settings.secondary_color = request.form.get('secondary_color')
+        settings.text_color = request.form.get('text_color')
+        settings.whatsapp_channel = request.form.get('whatsapp_channel')
+        settings.telegram_channel = request.form.get('telegram_channel')
         
         if request.form.get('new_admin_code'):
             settings.admin_code = request.form.get('new_admin_code')

@@ -13,6 +13,8 @@ class SiteSettings(db.Model):
     secondary_color = db.Column(db.String(7), default="#5BC0EB")
     text_color = db.Column(db.String(7), default="#FFFFFF")
     font_family = db.Column(db.String(100), default="Cairo")
+    whatsapp_channel = db.Column(db.String(500))
+    telegram_channel = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

@@ -203,7 +203,107 @@
             </div>
             <form id="editProductForm" method="POST">
                 <div class="modal-body">
-                    <!-- Form fields will be populated by JavaScript -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">اسم المنتج</label>
+                                <input type="text" name="name" class="form-control glass-input" id="edit_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">التصنيف</label>
+                                <select name="category_id" class="form-select glass-input" id="edit_category_id" required>
+                                    <option value="">اختر التصنيف</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">السعر (ريال)</label>
+                                <input type="number" name="price" class="form-control glass-input" id="edit_price" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">رابط الصورة</label>
+                                <input type="url" name="image_url" class="form-control glass-input" id="edit_image_url">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea name="description" class="form-control glass-input" id="edit_description" rows="4"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">المقاسات (اختياري)</label>
+                                <div class="size-checkboxes" id="edit_sizes">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sizes" value="صغير" id="edit_size1">
+                                        <label class="form-check-label" for="edit_size1">صغير</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sizes" value="متوسط" id="edit_size2">
+                                        <label class="form-check-label" for="edit_size2">متوسط</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sizes" value="كبير" id="edit_size3">
+                                        <label class="form-check-label" for="edit_size3">كبير</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sizes" value="كبير جداً" id="edit_size4">
+                                        <label class="form-check-label" for="edit_size4">كبير جداً</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الألوان (اختياري)</label>
+                                <div class="color-checkboxes" id="edit_colors">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أسود" id="edit_color1">
+                                        <label class="form-check-label" for="edit_color1">أسود</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أبيض" id="edit_color2">
+                                        <label class="form-check-label" for="edit_color2">أبيض</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أحمر" id="edit_color3">
+                                        <label class="form-check-label" for="edit_color3">أحمر</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أزرق" id="edit_color4">
+                                        <label class="form-check-label" for="edit_color4">أزرق</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="colors" value="أخضر" id="edit_color5">
+                                        <label class="form-check-label" for="edit_color5">أخضر</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="edit_is_active">
+                            <label class="form-check-label" for="edit_is_active">
+                                منتج نشط
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
@@ -217,10 +317,54 @@
 
 {% block scripts %}
 <script>
-function editProduct(productId) {
-    // This would typically fetch product data via AJAX
-    // For now, we'll use a simplified approach
-    window.location.href = `{{ url_for('admin_products') }}#edit-${productId}`;
+async function editProduct(productId) {
+    try {
+        // Fetch product data
+        const response = await fetch(`/admin/products/get/${productId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch product data');
+        }
+        
+        const product = await response.json();
+        
+        // Populate form fields
+        document.getElementById('edit_name').value = product.name || '';
+        document.getElementById('edit_category_id').value = product.category_id || '';
+        document.getElementById('edit_price').value = product.price || '';
+        document.getElementById('edit_image_url').value = product.image_url || '';
+        document.getElementById('edit_description').value = product.description || '';
+        document.getElementById('edit_is_active').checked = product.is_active || false;
+        
+        // Clear existing size and color checkboxes
+        document.querySelectorAll('#edit_sizes input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('#edit_colors input[type="checkbox"]').forEach(cb => cb.checked = false);
+        
+        // Set sizes
+        if (product.sizes && Array.isArray(product.sizes)) {
+            product.sizes.forEach(size => {
+                const checkbox = document.querySelector(`#edit_sizes input[value="${size}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+        
+        // Set colors
+        if (product.colors && Array.isArray(product.colors)) {
+            product.colors.forEach(color => {
+                const checkbox = document.querySelector(`#edit_colors input[value="${color}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+        
+        // Set form action
+        document.getElementById('editProductForm').action = `/admin/products/edit/${productId}`;
+        
+        // Show modal
+        new bootstrap.Modal(document.getElementById('editProductModal')).show();
+        
+    } catch (error) {
+        console.error('Error loading product data:', error);
+        alert('حدث خطأ أثناء تحميل بيانات المنتج');
+    }
 }
 </script>
 {% endblock %}

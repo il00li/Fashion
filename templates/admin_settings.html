@@ -43,6 +43,55 @@
                                    value="{{ settings.logo_url if settings else '' }}">
                         </div>
                         
+                        <!-- Color Customization Section -->
+                        <h5 class="mb-3">تخصيص ألوان الموقع</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">اللون الأساسي</label>
+                                    <input type="color" name="primary_color" class="form-control form-control-color glass-input" 
+                                           value="{{ settings.primary_color if settings else '#14213D' }}" title="اختر اللون الأساسي">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">اللون الثانوي</label>
+                                    <input type="color" name="secondary_color" class="form-control form-control-color glass-input" 
+                                           value="{{ settings.secondary_color if settings else '#5BC0EB' }}" title="اختر اللون الثانوي">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">لون النص</label>
+                                    <input type="color" name="text_color" class="form-control form-control-color glass-input" 
+                                           value="{{ settings.text_color if settings else '#FFFFFF' }}" title="اختر لون النص">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Media Links Section -->
+                        <h5 class="mb-3">روابط التواصل الاجتماعي</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">رابط قناة الواتساب</label>
+                                    <input type="url" name="whatsapp_channel" class="form-control glass-input" 
+                                           value="{{ settings.whatsapp_channel if settings else '' }}"
+                                           placeholder="https://whatsapp.com/channel/...">
+                                    <small class="form-text text-muted">رابط قناة الواتساب الخاصة بك</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">رابط قناة التلغرام</label>
+                                    <input type="url" name="telegram_channel" class="form-control glass-input" 
+                                           value="{{ settings.telegram_channel if settings else '' }}"
+                                           placeholder="https://t.me/...">
+                                    <small class="form-text text-muted">رابط قناة التلغرام الخاصة بك</small>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="mb-3">
                             <label class="form-label">رمز المدير الجديد (اتركه فارغاً لعدم التغيير)</label>
                             <input type="password" name="new_admin_code" class="form-control glass-input" 
