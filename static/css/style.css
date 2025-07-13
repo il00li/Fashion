@@ -193,6 +193,82 @@ body::before {
     color: var(--text-color);
 }
 
+/* Center content for better layout */
+.hero-section {
+    text-align: center;
+}
+
+.hero-title,
+.hero-description {
+    text-align: center;
+}
+
+.hero-image {
+    text-align: center;
+}
+
+/* Center buttons and content */
+.btn-glass {
+    margin: 0 auto;
+    display: inline-flex;
+}
+
+.categories-section,
+.products-section {
+    text-align: center;
+}
+
+.category-card,
+.product-card {
+    text-align: center;
+}
+
+.product-title {
+    text-align: center;
+}
+
+.product-description {
+    text-align: center;
+}
+
+.product-price,
+.product-price-large {
+    text-align: center;
+}
+
+/* Center admin content */
+.page-title {
+    text-align: center;
+}
+
+.stats-card {
+    text-align: center;
+}
+
+.glass-card .card-body {
+    text-align: center;
+}
+
+.form-label {
+    text-align: right;
+    display: block;
+}
+
+/* Admin Navigation */
+.admin-nav .btn-glass.active {
+    background: rgba(91, 192, 235, 0.3);
+    border-color: var(--accent-color);
+    color: var(--text-color);
+}
+
+.admin-nav .btn-glass {
+    margin: 0.25rem;
+}
+
+.admin-nav {
+    margin-bottom: 2rem;
+}
+
 .categories-section,
 .products-section {
     padding: 3rem 0;

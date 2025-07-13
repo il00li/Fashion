@@ -39,22 +39,7 @@
                             <i class="fas fa-home"></i> الرئيسية
                         </a>
                     </li>
-                    {% if session.admin_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-cog"></i> الإدارة
-                        </a>
-                        <ul class="dropdown-menu glass-dropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">لوحة التحكم</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_products') }}">المنتجات</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_orders') }}">الطلبات</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_regions') }}">المناطق</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_settings') }}">الإعدادات</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_logout') }}">تسجيل الخروج</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
+
                 </ul>
             </div>
         </div>
