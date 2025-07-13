@@ -464,6 +464,80 @@ def admin_delete_comment(comment_id):
     
     return redirect(url_for('admin_comments'))
 
+@app.route('/admin/categories/add', methods=['POST'])
+def admin_add_category():
+    if not is_admin_authenticated():
+        return redirect(url_for('admin_login'))
+    
+    try:
+        name = request.form.get('name')
+        description = request.form.get('description')
+        
+        category = Category(
+            name=name,
+            description=description
+        )
+        db.session.add(category)
+        db.session.commit()
+        
+        log_admin_action("إضافة تصنيف", f"تم إضافة تصنيف: {name}")
+        flash('تم إضافة التصنيف بنجاح!')
+        
+    except Exception as e:
+        logging.error(f"Error adding category: {str(e)}")
+        flash('حدث خطأ أثناء إضافة التصنيف.')
+    
+    return redirect(url_for('admin_settings'))
+
+@app.route('/admin/categories/edit/<int:category_id>', methods=['POST'])
+def admin_edit_category(category_id):
+    if not is_admin_authenticated():
+        return redirect(url_for('admin_login'))
+    
+    category = Category.query.get_or_404(category_id)
+    
+    try:
+        category.name = request.form.get('name')
+        category.description = request.form.get('description')
+        category.is_active = 'is_active' in request.form
+        
+        db.session.commit()
+        
+        log_admin_action("تعديل تصنيف", f"تم تعديل تصنيف: {category.name}")
+        flash('تم تعديل التصنيف بنجاح!')
+        
+    except Exception as e:
+        logging.error(f"Error editing category: {str(e)}")
+        flash('حدث خطأ أثناء تعديل التصنيف.')
+    
+    return redirect(url_for('admin_settings'))
+
+@app.route('/admin/categories/delete/<int:category_id>')
+def admin_delete_category(category_id):
+    if not is_admin_authenticated():
+        return redirect(url_for('admin_login'))
+    
+    category = Category.query.get_or_404(category_id)
+    category_name = category.name
+    
+    try:
+        # Check if category has products
+        if category.products:
+            flash('لا يمكن حذف التصنيف لأنه يحتوي على منتجات!')
+            return redirect(url_for('admin_settings'))
+        
+        db.session.delete(category)
+        db.session.commit()
+        
+        log_admin_action("حذف تصنيف", f"تم حذف تصنيف: {category_name}")
+        flash('تم حذف التصنيف بنجاح!')
+        
+    except Exception as e:
+        logging.error(f"Error deleting category: {str(e)}")
+        flash('حدث خطأ أثناء حذف التصنيف.')
+    
+    return redirect(url_for('admin_settings'))
+
 # Context processor to make settings available in all templates
 @app.context_processor
 def inject_settings():

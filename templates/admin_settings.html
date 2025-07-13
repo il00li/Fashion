@@ -88,9 +88,14 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editCategory({{ category.id }}, '{{ category.name }}', '{{ category.description or '' }}', {{ category.is_active|lower }})">
                                             <i class="fas fa-edit"></i>
                                         </button>
+                                        <a href="{{ url_for('admin_delete_category', category_id=category.id) }}" 
+                                           class="btn btn-sm btn-outline-danger" 
+                                           onclick="return confirm('هل أنت متأكد من حذف هذا التصنيف؟')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -167,4 +172,55 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل التصنيف</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editCategoryForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم التصنيف</label>
+                        <input type="text" name="name" class="form-control glass-input" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea name="description" class="form-control glass-input" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="editCategoryActive">
+                            <label class="form-check-label" for="editCategoryActive">
+                                تصنيف نشط
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-glass">حفظ التعديلات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function editCategory(categoryId, name, description, isActive) {
+    const form = document.getElementById('editCategoryForm');
+    form.action = `/admin/categories/edit/${categoryId}`;
+    
+    form.querySelector('input[name="name"]').value = name;
+    form.querySelector('textarea[name="description"]').value = description;
+    form.querySelector('input[name="is_active"]').checked = isActive;
+    
+    new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
+}
+</script>
 {% endblock %}
