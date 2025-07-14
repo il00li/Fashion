@@ -137,8 +137,117 @@
     <style>
         :root {
             --primary-color: {{ site_settings.primary_color }};
-            --accent-color: {{ site_settings.secondary_color }};
+            --secondary-color: {{ site_settings.secondary_color }};
             --text-color: {{ site_settings.text_color }};
+        }
+        
+        /* Convert hex colors to RGB for use in rgba() */
+        {% set primary_r = (site_settings.primary_color[1:3] | int(16)) %}
+        {% set primary_g = (site_settings.primary_color[3:5] | int(16)) %}
+        {% set primary_b = (site_settings.primary_color[5:7] | int(16)) %}
+        
+        {% set secondary_r = (site_settings.secondary_color[1:3] | int(16)) %}
+        {% set secondary_g = (site_settings.secondary_color[3:5] | int(16)) %}
+        {% set secondary_b = (site_settings.secondary_color[5:7] | int(16)) %}
+        
+        /* Apply custom colors */
+        body {
+            background: linear-gradient(135deg, 
+                rgba({{ primary_r }}, {{ primary_g }}, {{ primary_b }}, 0.1) 0%, 
+                rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.1) 100%) !important;
+        }
+        
+        .glass-nav {
+            background: linear-gradient(135deg, 
+                rgba({{ primary_r }}, {{ primary_g }}, {{ primary_b }}, 0.9) 0%, 
+                rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.8) 100%) !important;
+        }
+        
+        .glass-card, .glass-modal .modal-content {
+            background: linear-gradient(135deg, 
+                rgba({{ primary_r }}, {{ primary_g }}, {{ primary_b }}, 0.1) 0%, 
+                rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.1) 100%) !important;
+            border: 1px solid rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.2) !important;
+        }
+        
+        .btn-glass, .btn-glass:hover, .btn-glass:focus {
+            background: linear-gradient(135deg, 
+                {{ site_settings.secondary_color }} 0%, 
+                {{ site_settings.primary_color }} 100%) !important;
+            color: {{ site_settings.text_color }} !important;
+            border: none !important;
+        }
+        
+        .btn-glass:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 10px 25px rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.3) !important;
+        }
+        
+        .glass-input:focus {
+            border-color: {{ site_settings.secondary_color }} !important;
+            box-shadow: 0 0 0 0.2rem rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.25) !important;
+        }
+        
+        .navbar-brand, .nav-link {
+            color: {{ site_settings.text_color }} !important;
+        }
+        
+        .text-primary {
+            color: {{ site_settings.primary_color }} !important;
+        }
+        
+        .text-secondary {
+            color: {{ site_settings.secondary_color }} !important;
+        }
+        
+        .bg-primary {
+            background-color: {{ site_settings.primary_color }} !important;
+        }
+        
+        .bg-secondary {
+            background-color: {{ site_settings.secondary_color }} !important;
+        }
+        
+        /* Product cards styling */
+        .product-card:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 15px 35px rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.3) !important;
+        }
+        
+        /* Stats cards styling */
+        .stats-card {
+            background: linear-gradient(135deg, 
+                rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.1) 0%, 
+                rgba({{ primary_r }}, {{ primary_g }}, {{ primary_b }}, 0.1) 100%) !important;
+            border-left: 4px solid {{ site_settings.secondary_color }} !important;
+        }
+        
+        /* Glass footer */
+        .glass-footer {
+            background: linear-gradient(135deg, 
+                rgba({{ primary_r }}, {{ primary_g }}, {{ primary_b }}, 0.9) 0%, 
+                rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.8) 100%) !important;
+            color: {{ site_settings.text_color }} !important;
+        }
+        
+        /* Links in footer */
+        .glass-footer a {
+            color: {{ site_settings.text_color }} !important;
+        }
+        
+        /* Form controls */
+        .form-control:focus, .form-select:focus {
+            border-color: {{ site_settings.secondary_color }} !important;
+            box-shadow: 0 0 0 0.2rem rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.25) !important;
+        }
+        
+        /* Alerts */
+        .glass-alert {
+            background: linear-gradient(135deg, 
+                rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.1) 0%, 
+                rgba({{ primary_r }}, {{ primary_g }}, {{ primary_b }}, 0.1) 100%) !important;
+            border: 1px solid rgba({{ secondary_r }}, {{ secondary_g }}, {{ secondary_b }}, 0.3) !important;
+            color: {{ site_settings.text_color }} !important;
         }
     </style>
     {% endif %}

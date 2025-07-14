@@ -1,10 +1,74 @@
-from flask import render_template, request, redirect, url_for, flash, session, jsonify
+from flask import render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory
 from app import app, db
 from models import *
 import json
 from urllib.parse import quote
 from datetime import datetime
 import logging
+import os
+from werkzeug.utils import secure_filename
+from PIL import Image
+import uuid
+
+# Configuration for file uploads
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+# Ensure upload directory exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Helper function to check allowed file extensions
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Helper function to resize and optimize images
+def process_image(file_path, max_width=800, max_height=600, quality=85):
+    try:
+        with Image.open(file_path) as img:
+            # Convert RGBA to RGB if necessary
+            if img.mode in ('RGBA', 'LA'):
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                img = background
+            
+            # Calculate new dimensions
+            img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+            
+            # Save optimized image
+            img.save(file_path, 'JPEG', quality=quality, optimize=True)
+            
+        return True
+    except Exception as e:
+        logging.error(f"Error processing image: {e}")
+        return False
+
+# Helper function to upload and process image file
+def upload_image(file):
+    if file and allowed_file(file.filename):
+        try:
+            # Generate unique filename
+            filename = secure_filename(file.filename)
+            name, ext = os.path.splitext(filename)
+            unique_filename = f"{name}_{uuid.uuid4().hex[:8]}{ext}"
+            file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+            
+            # Save the file
+            file.save(file_path)
+            
+            # Process and optimize the image
+            if process_image(file_path):
+                return f"/static/uploads/{unique_filename}"
+            else:
+                # Remove file if processing failed
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                return None
+        except Exception as e:
+            logging.error(f"Error uploading image: {e}")
+            return None
+    return None
 
 # Helper function to check admin authentication
 def is_admin_authenticated():
@@ -225,9 +289,24 @@ def admin_add_product():
         description = request.form.get('description')
         price = float(request.form.get('price'))
         category_id = int(request.form.get('category_id'))
-        image_url = request.form.get('image_url')
         sizes = request.form.getlist('sizes')
         colors = request.form.getlist('colors')
+        
+        # Handle image upload
+        image_url = request.form.get('image_url', '')
+        image_file = request.files.get('image_file')
+        
+        if image_file and image_file.filename:
+            # Upload new image file
+            uploaded_url = upload_image(image_file)
+            if uploaded_url:
+                image_url = uploaded_url
+            else:
+                flash('فشل في رفع الصورة. تأكد من أن الملف صورة صحيحة وأقل من 5MB.')
+                return redirect(url_for('admin_products'))
+        elif not image_url:
+            flash('يجب إدخال رابط صورة أو رفع ملف صورة.')
+            return redirect(url_for('admin_products'))
         
         product = Product(
             name=name,
@@ -262,10 +341,34 @@ def admin_edit_product(product_id):
         product.description = request.form.get('description')
         product.price = float(request.form.get('price'))
         product.category_id = int(request.form.get('category_id'))
-        product.image_url = request.form.get('image_url')
         product.sizes = json.dumps(request.form.getlist('sizes'))
         product.colors = json.dumps(request.form.getlist('colors'))
         product.is_active = 'is_active' in request.form
+        
+        # Handle image upload
+        image_url = request.form.get('image_url', '')
+        image_file = request.files.get('image_file')
+        
+        if image_file and image_file.filename:
+            # Upload new image file
+            uploaded_url = upload_image(image_file)
+            if uploaded_url:
+                # Delete old image file if it was uploaded (not external URL)
+                if product.image_url and product.image_url.startswith('/static/uploads/'):
+                    old_file_path = product.image_url.replace('/static/', 'static/')
+                    if os.path.exists(old_file_path):
+                        try:
+                            os.remove(old_file_path)
+                        except:
+                            pass  # Ignore if file can't be deleted
+                product.image_url = uploaded_url
+            else:
+                flash('فشل في رفع الصورة. تأكد من أن الملف صورة صحيحة وأقل من 5MB.')
+                return redirect(url_for('admin_products'))
+        elif image_url:
+            # Use provided URL
+            product.image_url = image_url
+        # If neither file nor URL provided, keep the existing image
         
         db.session.commit()
         

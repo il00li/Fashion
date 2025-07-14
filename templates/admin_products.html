@@ -89,7 +89,7 @@
                 <h5 class="modal-title">إضافة منتج جديد</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('admin_add_product') }}" method="POST">
+            <form action="{{ url_for('admin_add_product') }}" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -120,8 +120,24 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">رابط الصورة</label>
-                                <input type="url" name="image_url" class="form-control glass-input">
+                                <label class="form-label">صورة المنتج</label>
+                                <div class="image-upload-options mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="image_option" id="file_option" value="file" checked>
+                                        <label class="form-check-label" for="file_option">رفع ملف</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="image_option" id="url_option" value="url">
+                                        <label class="form-check-label" for="url_option">رابط</label>
+                                    </div>
+                                </div>
+                                <div id="file_input_container">
+                                    <input type="file" name="image_file" class="form-control glass-input" accept="image/*">
+                                    <small class="form-text text-muted">الحد الأقصى: 5MB</small>
+                                </div>
+                                <div id="url_input_container" style="display: none;">
+                                    <input type="url" name="image_url" class="form-control glass-input" placeholder="https://example.com/image.jpg">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -201,7 +217,7 @@
                 <h5 class="modal-title">تعديل المنتج</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="editProductForm" method="POST">
+            <form id="editProductForm" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -232,8 +248,24 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">رابط الصورة</label>
-                                <input type="url" name="image_url" class="form-control glass-input" id="edit_image_url">
+                                <label class="form-label">صورة المنتج</label>
+                                <div class="image-upload-options mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="edit_image_option" id="edit_file_option" value="file">
+                                        <label class="form-check-label" for="edit_file_option">رفع ملف</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="edit_image_option" id="edit_url_option" value="url" checked>
+                                        <label class="form-check-label" for="edit_url_option">رابط</label>
+                                    </div>
+                                </div>
+                                <div id="edit_file_input_container" style="display: none;">
+                                    <input type="file" name="image_file" class="form-control glass-input" accept="image/*">
+                                    <small class="form-text text-muted">الحد الأقصى: 5MB</small>
+                                </div>
+                                <div id="edit_url_input_container">
+                                    <input type="url" name="image_url" class="form-control glass-input" id="edit_image_url" placeholder="https://example.com/image.jpg">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -411,7 +443,57 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.warn('Could not initialize modal:', error);
             }
         });
+        
+        // Handle image upload option switching
+        setupImageUploadOptions();
     });
 });
+
+function setupImageUploadOptions() {
+    // Add Product Modal
+    const fileOption = document.getElementById('file_option');
+    const urlOption = document.getElementById('url_option');
+    const fileContainer = document.getElementById('file_input_container');
+    const urlContainer = document.getElementById('url_input_container');
+    
+    if (fileOption && urlOption) {
+        fileOption.addEventListener('change', function() {
+            if (this.checked) {
+                fileContainer.style.display = 'block';
+                urlContainer.style.display = 'none';
+                urlContainer.querySelector('input').removeAttribute('required');
+            }
+        });
+        
+        urlOption.addEventListener('change', function() {
+            if (this.checked) {
+                fileContainer.style.display = 'none';
+                urlContainer.style.display = 'block';
+            }
+        });
+    }
+    
+    // Edit Product Modal
+    const editFileOption = document.getElementById('edit_file_option');
+    const editUrlOption = document.getElementById('edit_url_option');
+    const editFileContainer = document.getElementById('edit_file_input_container');
+    const editUrlContainer = document.getElementById('edit_url_input_container');
+    
+    if (editFileOption && editUrlOption) {
+        editFileOption.addEventListener('change', function() {
+            if (this.checked) {
+                editFileContainer.style.display = 'block';
+                editUrlContainer.style.display = 'none';
+            }
+        });
+        
+        editUrlOption.addEventListener('change', function() {
+            if (this.checked) {
+                editFileContainer.style.display = 'none';
+                editUrlContainer.style.display = 'block';
+            }
+        });
+    }
+}
 </script>
 {% endblock %}
