@@ -1,5 +1,12 @@
 // Yemen Fashion Store - Main JavaScript
-document.addEventListener('DOMContentLoaded', function() {
+// Ensure Bootstrap is loaded before initializing
+function initializeApp() {
+    // Check if Bootstrap is loaded
+    if (typeof bootstrap === 'undefined') {
+        setTimeout(initializeApp, 100);
+        return;
+    }
+
     // Logo click counter for admin access
     let logoClickCount = 0;
     let logoClickTimer = null;
@@ -239,7 +246,40 @@ document.addEventListener('DOMContentLoaded', function() {
             behavior: 'smooth'
         });
     });
-});
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
+
+// Additional initialization for modals and dropdowns
+function ensureBootstrapComponents() {
+    if (typeof bootstrap !== 'undefined') {
+        // Initialize all tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Initialize all popovers
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+        });
+        
+        // Ensure dropdowns work
+        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+            return new bootstrap.Dropdown(dropdownToggleEl);
+        });
+    }
+}
+
+// Run component initialization after a short delay
+setTimeout(ensureBootstrapComponents, 500);
 
 // Utility functions
 function showAlert(message, type = 'info') {
