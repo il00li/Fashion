@@ -317,8 +317,22 @@
 
 {% block scripts %}
 <script>
+// Wait for Bootstrap to be loaded
+function waitForBootstrap() {
+    return new Promise((resolve) => {
+        if (typeof bootstrap !== 'undefined') {
+            resolve();
+        } else {
+            setTimeout(() => waitForBootstrap().then(resolve), 100);
+        }
+    });
+}
+
 async function editProduct(productId) {
     try {
+        // Ensure Bootstrap is loaded
+        await waitForBootstrap();
+        
         // Fetch product data
         const response = await fetch(`/admin/products/get/${productId}`);
         if (!response.ok) {
@@ -358,13 +372,46 @@ async function editProduct(productId) {
         // Set form action
         document.getElementById('editProductForm').action = `/admin/products/edit/${productId}`;
         
-        // Show modal
-        new bootstrap.Modal(document.getElementById('editProductModal')).show();
+        // Show modal with retry mechanism
+        const modalElement = document.getElementById('editProductModal');
+        if (modalElement) {
+            try {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            } catch (modalError) {
+                console.error('Modal error:', modalError);
+                // Fallback: try again after a short delay
+                setTimeout(() => {
+                    try {
+                        const retryModal = new bootstrap.Modal(modalElement);
+                        retryModal.show();
+                    } catch (retryError) {
+                        console.error('Modal retry failed:', retryError);
+                        alert('خطأ في فتح نافذة التعديل. يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى.');
+                    }
+                }, 300);
+            }
+        }
         
     } catch (error) {
         console.error('Error loading product data:', error);
-        alert('حدث خطأ أثناء تحميل بيانات المنتج');
+        alert('حدث خطأ أثناء تحميل بيانات المنتج. يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى.');
     }
 }
+
+// Initialize modals when page is ready
+document.addEventListener('DOMContentLoaded', function() {
+    waitForBootstrap().then(() => {
+        // Initialize all modals manually
+        const modalElements = document.querySelectorAll('.modal');
+        modalElements.forEach(modalElement => {
+            try {
+                new bootstrap.Modal(modalElement);
+            } catch (error) {
+                console.warn('Could not initialize modal:', error);
+            }
+        });
+    });
+});
 </script>
 {% endblock %}

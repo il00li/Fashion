@@ -261,15 +261,96 @@
 
 {% block scripts %}
 <script>
-function editCategory(categoryId, name, description, isActive) {
-    const form = document.getElementById('editCategoryForm');
-    form.action = `/admin/categories/edit/${categoryId}`;
-    
-    form.querySelector('input[name="name"]').value = name;
-    form.querySelector('textarea[name="description"]').value = description;
-    form.querySelector('input[name="is_active"]').checked = isActive;
-    
-    new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
+// Wait for Bootstrap to be loaded
+function waitForBootstrap() {
+    return new Promise((resolve) => {
+        if (typeof bootstrap !== 'undefined') {
+            resolve();
+        } else {
+            setTimeout(() => waitForBootstrap().then(resolve), 100);
+        }
+    });
 }
+
+async function editCategory(categoryId, name, description, isActive) {
+    try {
+        // Ensure Bootstrap is loaded
+        await waitForBootstrap();
+        
+        const form = document.getElementById('editCategoryForm');
+        form.action = `/admin/categories/edit/${categoryId}`;
+        
+        form.querySelector('input[name="name"]').value = name;
+        form.querySelector('textarea[name="description"]').value = description;
+        form.querySelector('input[name="is_active"]').checked = isActive;
+        
+        // Show modal with retry mechanism
+        const modalElement = document.getElementById('editCategoryModal');
+        if (modalElement) {
+            try {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            } catch (modalError) {
+                console.error('Modal error:', modalError);
+                // Fallback: try again after a short delay
+                setTimeout(() => {
+                    try {
+                        const retryModal = new bootstrap.Modal(modalElement);
+                        retryModal.show();
+                    } catch (retryError) {
+                        console.error('Modal retry failed:', retryError);
+                        alert('خطأ في فتح نافذة التعديل. يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى.');
+                    }
+                }, 300);
+            }
+        }
+    } catch (error) {
+        console.error('Error in editCategory:', error);
+        alert('حدث خطأ. يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى.');
+    }
+}
+
+// Initialize modals when page is ready
+document.addEventListener('DOMContentLoaded', function() {
+    waitForBootstrap().then(() => {
+        // Initialize all modals manually
+        const modalElements = document.querySelectorAll('.modal');
+        modalElements.forEach(modalElement => {
+            try {
+                new bootstrap.Modal(modalElement);
+            } catch (error) {
+                console.warn('Could not initialize modal:', error);
+            }
+        });
+        
+        // Fix any broken buttons
+        const buttons = document.querySelectorAll('[data-bs-toggle="modal"]');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetModalId = this.getAttribute('data-bs-target');
+                if (targetModalId) {
+                    const modalElement = document.querySelector(targetModalId);
+                    if (modalElement) {
+                        try {
+                            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                            modal.show();
+                        } catch (error) {
+                            console.error('Button modal error:', error);
+                            setTimeout(() => {
+                                try {
+                                    const retryModal = new bootstrap.Modal(modalElement);
+                                    retryModal.show();
+                                } catch (retryError) {
+                                    console.error('Button modal retry failed:', retryError);
+                                }
+                            }, 200);
+                        }
+                    }
+                }
+            });
+        });
+    });
+});
 </script>
 {% endblock %}
