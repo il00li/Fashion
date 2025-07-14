@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: yemen-fashion-store
+    env: python
+    plan: free
+    buildCommand: pip install -e .
+    startCommand: gunicorn --bind 0.0.0.0:$PORT main:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: yemen-fashion-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+
+databases:
+  - name: yemen-fashion-db
+    plan: free
