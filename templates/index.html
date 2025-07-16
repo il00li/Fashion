@@ -90,18 +90,15 @@
                 <span class="ms-2">({{ product.ratings|length }})</span>
               </div>
 
-              <div class="d-grid">
-                <a
-                  href="https://wa.me/{{ site_settings.whatsapp_number 
-                                       if site_settings and site_settings.whatsapp_number 
-                                       else '967777777777' 
-                                     }}?text=مرحبًا،%20أرغب%20بطلب%20المنتج%20{{ product.name }}"
-                  target="_blank"
-                  class="btn btn-success btn-lg"
-                >
-                  <i class="fab fa-whatsapp"></i> طلب المنتج
-                </a>
-              </div>
+              <form onsubmit="sendToWhatsApp(event, '{{ product.name }}')" class="whatsapp-form mt-3">
+                <input type="text" placeholder="اسمك" id="name_{{ product.id }}" required class="form-control mb-2">
+                <input type="text" placeholder="الكمية" id="qty_{{ product.id }}" required class="form-control mb-2">
+                <input type="text" placeholder="اللون / المقاس" id="color_{{ product.id }}" required class="form-control mb-2">
+                <textarea placeholder="ملاحظات" id="note_{{ product.id }}" class="form-control mb-2"></textarea>
+                <button type="submit" class="btn btn-success">
+                  <i class="fab fa-whatsapp"></i> إرسال الطلب عبر واتساب
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -116,4 +113,22 @@
       {% endif %}
     </div>
   </section>
+
+  <script>
+    function sendToWhatsApp(event, productName) {
+      event.preventDefault();
+
+      const id = event.target.querySelector('input, textarea').id.split('_')[1];
+      const name = document.getElementById("name_" + id).value;
+      const qty = document.getElementById("qty_" + id).value;
+      const color = document.getElementById("color_" + id).value;
+      const note = document.getElementById("note_" + id).value;
+
+      const number = "{{ site_settings.whatsapp_number if site_settings and site_settings.whatsapp_number else '967777777777' }}";
+      const message = `مرحبًا، أنا ${name}. أرغب بطلب المنتج: ${productName}. الكمية: ${qty}، اللون/المقاس: ${color}. ملاحظات: ${note}`;
+      const url = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+
+      window.open(url, '_blank');
+    }
+  </script>
 {% endblock %}
