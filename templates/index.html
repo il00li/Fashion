@@ -92,17 +92,10 @@
 
               <div class="d-grid">
                 <a
-                  href="https://wa.me/{{ site_settings.whatsapp_number
-                                       if site_settings and site_settings.whatsapp_number
-                                       else '967777777777' }}
-                           ?text={{ (
-                             'مرحبًا ' ~
-                             (current_user.name if current_user.is_authenticated else '') ~
-                             '، أود طلب المنتج ' ~
-                             product.name ~
-                             ' بكمية __ واللون __. رابط المنتج: ' ~
-                             url_for('product_detail', product_id=product.id, _external=True)
-                           ) | urlencode }}"
+                  href="https://wa.me/{{ site_settings.whatsapp_number 
+                                       if site_settings and site_settings.whatsapp_number 
+                                       else '967777777777' 
+                                     }}?text=مرحبًا،%20أرغب%20بطلب%20المنتج%20{{ product.name }}"
                   target="_blank"
                   class="btn btn-success btn-lg"
                 >
